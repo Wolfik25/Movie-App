@@ -1,13 +1,59 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html, body {
+width: 100%;
+height: 100%;
+margin: 0;
+padding: 0;
+background-color: #E5E5E5;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.container {
+    max-width: 1010px;
+    min-height: 100vh;
+    background-color: #FFFFFF;
+    margin: 0 auto;
 }
+
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.ant-card {
+    margin: 19px 18px 17px 29px;
+}
+
+.ant-card-body {
+    display: grid;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 5px 5px 10px gray;
+    padding: 3px;
+    padding-bottom: 0;
+    grid-template-columns: 183px 1fr;
+    grid-column-gap: 20px;
+    grid-template-areas: "img title title"
+    "img date date"
+    "img tag tag"
+    "img discription discription";
+}
+
+.ant-image {
+    grid-area: img;
+}
+
+h3.ant-typography {
+    grid-area: title;
+}
+
+span.ant-typography {
+    grid-area: date;
+}
+
+div.ant-typography {
+    grid-area: discription;
+}
+
+.card-tag {
+    grid-area: tag;
+}
+
