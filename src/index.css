@@ -57,3 +57,9 @@ div.ant-typography {
     grid-area: tag;
 }
 
+.spin, .alert{
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding: 100px;
+    margin: right;
+}
