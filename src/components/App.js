@@ -1,11 +1,12 @@
 
-import { Layout, Spin, Alert } from 'antd';
+import { Layout, Spin, Alert, Input, Tabs, Pagination } from 'antd';
 import { Component } from 'react';
-import axios from 'axios';
-import { Offline, Online } from 'react-detect-offline';
+import axios from 'axios'; 
 
 import Movie from './Movie';
+import NetworkState from './NetworkState';
 
+const { TabPane } = Tabs;
 class App extends Component {
     constructor() {
         super();
@@ -13,6 +14,7 @@ class App extends Component {
             isLoading: true,
             movies: [],
             error: false,
+            network: false,
         };
     }
 
@@ -21,6 +23,10 @@ class App extends Component {
             error: true,
             isLoading: false,
         });
+    };
+
+    onNetworkState = () => {
+        this.setState(prevState => ({network: !prevState.network}));
     };
 
     componentDidMount() {
@@ -38,25 +44,33 @@ class App extends Component {
     };
 
     render() {
-        const { movies, isLoading, error } = this.state;
+        const { movies, isLoading, error, network } = this.state;
         return <>
             <Layout className='container'>
-                <Offline><Alert message='Failed internet' /></Offline>
-                <Online>
-                    < div className='wrapper'>
-                        {error ? <Alert className='alert' message="Something has gone wrong" type="error" showIcon /> : null}
-                        {isLoading ? <Spin className='spin' /> : movies.map((el) => {
-                            return <Movie
-                                key={el.id}
-                                poster={el.poster_path}
-                                title={el.title}
-                                date={el.release_date}
-                                summary={el.overview}
-                                genres={el.genre_ids} />;
-                        })
-                        }
-                    </div>
-                </Online>
+                <NetworkState onNetworkState={this.onNetworkState} />
+                {network ? <Alert className='alert alert-net' message='Ooops! The Internet connection is interrupted, we are trying to restore it...' /> : null}
+                {error ? <Alert className='alert' message="Something has gone wrong" type="error" showIcon /> : null}
+                <Tabs defaultActiveKey="1" >
+                    <TabPane tab="Search" key="1">
+                        <Input placeholder="Type to search" />
+                        < div className='wrapper-movies'>
+                            {isLoading ? <Spin className='spin' /> : movies.map((el) => {
+                                return <Movie
+                                    key={el.id}
+                                    poster={el.poster_path}
+                                    title={el.title}
+                                    date={el.release_date}
+                                    summary={el.overview}
+                                    genres={el.genre_ids} />;
+                            })
+                            }
+                        </div>
+                        <Pagination defaultCurrent={1} total={10}/>
+                    </TabPane>
+                    <TabPane tab="Rated" key="2">
+                        Content of Tab Pane 2
+                    </TabPane>
+                </Tabs>
             </Layout>;
         </>;
     }
