@@ -1,10 +1,11 @@
 
-import { Layout, Spin, Alert, Input, Tabs, Pagination } from 'antd';
+import { Layout, Spin, Alert, Tabs, Pagination } from 'antd';
 import { Component } from 'react';
-import axios from 'axios'; 
+import axios from 'axios';
 
 import Movie from './Movie';
 import NetworkState from './NetworkState';
+import SearchMovie from './SearchMovie';
 
 const { TabPane } = Tabs;
 class App extends Component {
@@ -15,6 +16,9 @@ class App extends Component {
             movies: [],
             error: false,
             network: false,
+            searchQuery: 'return',
+            page: 1,
+            total: 0,
         };
     }
 
@@ -26,25 +30,71 @@ class App extends Component {
     };
 
     onNetworkState = () => {
-        this.setState(prevState => ({network: !prevState.network}));
+        this.setState(prevState => ({ network: !prevState.network }));
     };
 
     componentDidMount() {
         this.getMovies();
     };
 
+    componentDidUpdate(prevProps, prevState) {
+        const { searchQuery, page } = this.state;
+        if (prevState.searchQuery !== searchQuery) {
+            this.getMovies();
+        }
+        if (prevState.page !== page) {
+            this.getMovies();
+        }
+    }
+
+    onSearchQuery = (query) => {
+        this.setState({
+            searchQuery: query,
+            isLoading: true,
+            page: 1,
+        });
+    };
+
     getMovies = async () => {
-        const apiMovie = 'https://api.themoviedb.org/3/search/movie?api_key=22077a20ad2f607a753b5ab7dd397260&query=return';
-        const { data: { results } } = await axios.get(apiMovie)
+        const { searchQuery, page } = this.state;
+        const apiMovie = `https://api.themoviedb.org/3/search/movie?api_key=22077a20ad2f607a753b5ab7dd397260&query=${searchQuery}&page=${page}`;
+        const { data: { results, total_pages: total } } = await axios.get(apiMovie)
             .catch(this.onError);
         this.setState({
             movies: results,
             isLoading: false,
+            total: total * 10,
         });
     };
 
+    onChangePage = (page) => {
+        this.setState({
+            page,
+            isLoading: true,
+        });
+    };
+
+    getViewMovies = () => {
+        const { movies } = this.state;
+        if (movies.length < 1) {
+            <Alert className='nofilms' message="The search has not given any results. Please enter a different movie title" />;
+        }
+
+        return movies.map((el) => {
+            return <Movie
+                key={el.id}
+                poster={el.poster_path}
+                title={el.title}
+                rating={el.vote_average}
+                date={el.release_date}
+                summary={el.overview}
+                genres={el.genre_ids} />;
+        });
+    };
+
+
     render() {
-        const { movies, isLoading, error, network } = this.state;
+        const { isLoading, error, network, page, total } = this.state;
         return <>
             <Layout className='container'>
                 <NetworkState onNetworkState={this.onNetworkState} />
@@ -52,20 +102,11 @@ class App extends Component {
                 {error ? <Alert className='alert' message="Something has gone wrong" type="error" showIcon /> : null}
                 <Tabs defaultActiveKey="1" >
                     <TabPane tab="Search" key="1">
-                        <Input placeholder="Type to search" />
+                        <SearchMovie onSearchQuery={this.onSearchQuery} />
                         < div className='wrapper-movies'>
-                            {isLoading ? <Spin className='spin' /> : movies.map((el) => {
-                                return <Movie
-                                    key={el.id}
-                                    poster={el.poster_path}
-                                    title={el.title}
-                                    date={el.release_date}
-                                    summary={el.overview}
-                                    genres={el.genre_ids} />;
-                            })
-                            }
+                            {isLoading ? <Spin className='spin' /> : this.getViewMovies()}
                         </div>
-                        <Pagination defaultCurrent={1} total={10}/>
+                        <Pagination showSizeChanger={false} current={page} total={total} onChange={this.onChangePage} />
                     </TabPane>
                     <TabPane tab="Rated" key="2">
                         Content of Tab Pane 2
