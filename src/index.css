@@ -17,10 +17,14 @@ background-color: #E5E5E5;
 .wrapper-movies {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    padding: 0 36px;
 }
 
 .ant-card {
-    margin: 19px 18px 17px 29px;
+    margin: 19px 0 17px 0;
+    width: 453px;
+    height: 281px;
 }
 
 .ant-card-body {
@@ -28,14 +32,15 @@ background-color: #E5E5E5;
     overflow: hidden;
     height: 100%;
     box-shadow: 5px 5px 10px gray;
-    padding: 3px;
+    padding: 0 20px 0 0;
     padding-bottom: 0;
-    grid-template-columns: 183px 1fr;
-    grid-column-gap: 20px;
-    grid-template-areas: "img title title"
+    grid-template-columns: 183px 1fr 38px;
+    grid-column-gap: 14px;
+    grid-template-areas: "img title rating"
     "img date date"
     "img tag tag"
-    "img discription discription";
+    "img discription discription"
+    "img rating-stars rating-stars";
 }
 
 .ant-image {
@@ -44,14 +49,20 @@ background-color: #E5E5E5;
 
 h3.ant-typography {
     grid-area: title;
+    margin: 0;
+    font-size: 20px;
+    align-self: center;
 }
 
 span.ant-typography {
     grid-area: date;
+    font-size: 12px;
 }
 
 div.ant-typography {
     grid-area: discription;
+    margin: 0;
+    font-size: 12px;
 }
 
 .card-tag {
@@ -79,12 +90,35 @@ div.ant-typography {
 }
 
 .ant-input {
-    width: 95%;
-    margin-left: 29px;
-    margin-right: 29px;
+    width: 92%;
+    margin-left: 40px;
 }
 
 .ant-tabs-nav-wrap, .ant-pagination {
     display: flex;
     justify-content: center;
+}
+
+.rating {
+    grid-area: rating;
+    width: 40px;
+    height: 40px;
+    border: 2px solid yellow;
+    border-radius: 50%;
+    text-align: center;
+    padding: 8px;
+    margin: 12px 9px;
+}
+
+.ant-rate {
+    grid-area: rating-stars;
+    align-self: center;
+    font-size: 15px;
+}
+
+.nofilms {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: 10px;
+    text-align: center;
 }
