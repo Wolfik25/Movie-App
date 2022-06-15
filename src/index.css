@@ -103,11 +103,27 @@ div.ant-typography {
     grid-area: rating;
     width: 40px;
     height: 40px;
-    border: 2px solid yellow;
     border-radius: 50%;
+    border: 2px solid black;
     text-align: center;
     padding: 8px;
     margin: 12px 9px;
+}
+
+.rating-up-to-three {
+    border:2px solid #E90000;
+}
+
+.rating-up-to-five {
+    border:2px solid #E97E00;
+}
+
+.rating-up-to-seven {
+    border:2px solid #E9D100;
+}
+
+.rating-up-to-ten {
+    border: 2px solid #66E900;
 }
 
 .ant-rate {
