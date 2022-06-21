@@ -11,7 +11,6 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-        "airbnb",
         "plugin:prettier/recommended",
         "plugin:import/errors",
         "plugin:import/warnings"
@@ -36,6 +35,13 @@
         "import"
     ],
     "rules": {
+        "no-unused-expressions": [
+            0,
+            {
+                "allowTernary": true
+            }
+        ],
+        "react/no-unused-class-component-methods": 0,
         "indent": [
             "error",
             4,

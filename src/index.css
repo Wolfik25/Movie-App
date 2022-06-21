@@ -47,6 +47,10 @@ background-color: #E5E5E5;
     grid-area: img;
 }
 
+.ant-tag {
+    margin-bottom: 7px;
+}
+
 h3.ant-typography {
     grid-area: title;
     margin: 0;
@@ -137,4 +141,17 @@ div.ant-typography {
     grid-column-end: 3;
     margin: 10px;
     text-align: center;
+}
+
+@media(max-width: 1000px) {
+    .wrapper-movies{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .ant-input {
+        display: block;
+        width: 451px;
+        margin: 0 auto;
+    }
 }
