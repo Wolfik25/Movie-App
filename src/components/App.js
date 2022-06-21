@@ -1,15 +1,18 @@
 
 import { Layout, Spin, Alert, Tabs, Pagination } from 'antd';
 import { Component } from 'react';
-import axios from 'axios';
 
 import Movie from './Movie';
 import NetworkState from './NetworkState';
 import SearchMovie from './SearchMovie';
 import { Provider } from './Context';
+import MovieServiсe from './MovieService';
 
 const { TabPane } = Tabs;
+
 class App extends Component {
+    movieService = new MovieServiсe();
+
     constructor() {
         super();
         this.state = {
@@ -21,6 +24,9 @@ class App extends Component {
             page: 1,
             total: 0,
             genres: null,
+            starsFilms: [],
+            currentPage: 'search',
+            sessionId: null,
         };
     }
 
@@ -36,21 +42,58 @@ class App extends Component {
     };
 
     componentDidMount() {
-        this.getGenres();
+        this.movieService.createSession().then((session) => { this.setState({ sessionId: session.data.guest_session_id }); });
+        this.movieService.getGenres().then((genre) => { this.setState({ genres: genre.data.genres }); });
         this.getMovies();
     };
 
     componentDidUpdate(prevProps, prevState) {
-        const { searchQuery, page } = this.state;
+        const { searchQuery, page, currentPage } = this.state;
         if (prevState.searchQuery !== searchQuery) {
             this.getMovies();
-            this.getGenres();
         }
         if (prevState.page !== page) {
             this.getMovies();
-            this.getGenres();
         }
+        if (currentPage === 'rated') this.onGetRate();
     }
+
+    onGetRate = () => {
+        const { sessionId } = this.state;
+        const guestSession = sessionId;
+        this.movieService.getRateMovies(guestSession).then(this.cardMovies()).catch(this.onError);;
+    };
+
+    onChangeRate = (id, rate) => {
+        const { sessionId, movies, starsFilms } = this.state;
+        const guestSession = sessionId;
+        this.movieService.setRateMovies(id, guestSession, rate);
+        localStorage.setItem(id, rate);
+
+        movies.filter(el => {
+            if (el.id === id) {
+                if (!starsFilms.length) {
+                    this.setState({
+                        starsFilms: [el]
+                    });
+                }
+                if (starsFilms.length) {
+                    const isRatedfilm = starsFilms.findIndex(elem => elem.id === id);
+                    const filmWithNewRating = [...starsFilms.slice(0, isRatedfilm), el, ...starsFilms.slice(isRatedfilm + 1)];
+                    if (isRatedfilm) {
+                        this.setState({
+                            starsFilms: [...filmWithNewRating]
+                        });
+                    }
+                    if (isRatedfilm === -1) {
+                        this.setState({
+                            starsFilms: [...starsFilms, el]
+                        });
+                    }
+                };
+            } return el;
+        });
+    };
 
     onSearchQuery = (query) => {
         this.setState({
@@ -60,16 +103,15 @@ class App extends Component {
         });
     };
 
-    getMovies = async () => {
+    getMovies = () => {
         const { searchQuery, page } = this.state;
-        const apiMovie = `https://api.themoviedb.org/3/search/movie?api_key=22077a20ad2f607a753b5ab7dd397260&query=${searchQuery}&page=${page}`;
-        const { data: { results, total_pages: total } } = await axios.get(apiMovie)
-            .catch(this.onError);
-        this.setState({
-            movies: results,
-            isLoading: false,
-            total: total * 10,
-        });
+        this.movieService.getMovies(searchQuery, page).then(({ results, total_pages: total }) => {
+            this.setState({
+                movies: results,
+                isLoading: false,
+                total: total * 10,
+            });
+        }).catch(this.onError);;
     };
 
     onChangePage = (page) => {
@@ -79,13 +121,18 @@ class App extends Component {
         });
     };
 
-    getViewMovies = () => {
-        const { movies } = this.state;
-        if (movies.length < 1) {
+    cardMovies = () => {
+        const { movies, currentPage, starsFilms } = this.state;
+
+        if (movies.length === 0) {
             <Alert className='nofilms' message="The search has not given any results. Please enter a different movie title" />;
         }
+        let currentDataForPage = movies;
+        if (currentPage === 'rated') {
+            currentDataForPage = starsFilms;
+        } else currentDataForPage = movies;
 
-        return movies.map((el) => {
+        return currentDataForPage.map((el) => {
             return <Movie
                 key={el.id}
                 poster={el.poster_path}
@@ -93,39 +140,36 @@ class App extends Component {
                 rating={el.vote_average}
                 date={el.release_date}
                 summary={el.overview}
-                genresIds={el.genre_ids} />;
+                genresIds={el.genre_ids}
+                onChangeRate={this.onChangeRate}
+                movieId={el.id} />;
         });
     };
 
-    getGenres = async () => {
-        const apiGenres = 'https://api.themoviedb.org/3/genre/movie/list?api_key=22077a20ad2f607a753b5ab7dd397260';
-        const genre = await axios.get(apiGenres);
-        this.setState({
-            genres: genre.data.genres
-        });
+    onHandlePage = (currentPage) => {
+        currentPage === 'rated' ? this.setState({ currentPage: 'rated' }) : this.setState({ currentPage: 'search' });
     };
-
-
-
 
     render() {
-        const { isLoading, error, network, page, total, genres } = this.state;
+        const { isLoading, error, network, page, total, genres, starsFilms } = this.state;
         return (
             <Provider value={genres}>
                 <Layout className='container'>
                     <NetworkState onNetworkState={this.onNetworkState} />
                     {network ? <Alert className='alert alert-net' message='Ooops! The Internet connection is interrupted, we are trying to restore it...' /> : null}
                     {error ? <Alert className='alert' message="Something has gone wrong" type="error" showIcon /> : null}
-                    <Tabs defaultActiveKey="1" >
-                        <TabPane tab="Search" key="1">
+                    <Tabs defaultActiveKey="1" onChange={this.onHandlePage} >
+                        <TabPane tab="Search" key="search">
                             <SearchMovie onSearchQuery={this.onSearchQuery} />
                             < div className='wrapper-movies'>
-                                {isLoading ? <Spin className='spin' /> : this.getViewMovies()}
+                                {isLoading ? <Spin className='spin' /> : this.cardMovies()}
                             </div>
                             <Pagination showSizeChanger={false} current={page} total={total} onChange={this.onChangePage} />
                         </TabPane>
-                        <TabPane tab="Rated" key="2">
-                            Content of Tab Pane 2
+                        <TabPane tab="Rated" key="rated"  >
+                            < div className='wrapper-movies'>
+                                {!starsFilms.length ? <Alert className='nofilms' message='Here will your rated films' /> : this.cardMovies()}
+                            </div>
                         </TabPane>
                     </Tabs>
                 </Layout>;
