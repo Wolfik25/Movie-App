@@ -1,0 +1,58 @@
+.ant-card {
+    margin: 19px 0 17px 0;
+    width: 453px;
+    height: 281px;
+}
+
+.ant-card-body {
+    display: grid;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 5px 5px 10px gray;
+    padding: 0 20px 0 0;
+    padding-bottom: 0;
+    grid-template-columns: 183px 1fr 38px;
+    grid-column-gap: 14px;
+    grid-template-areas: "img title rating"
+        "img date date"
+        "img tag tag"
+        "img discription discription"
+        "img rating-stars rating-stars";
+}
+
+.ant-image {
+    grid-area: img;
+}
+
+.ant-tag {
+    margin-bottom: 7px;
+}
+
+h3.ant-typography {
+    grid-area: title;
+    margin: 0;
+    font-size: 20px;
+    align-self: center;
+}
+
+span.ant-typography {
+    grid-area: date;
+    font-size: 12px;
+}
+
+div.ant-typography {
+    grid-area: discription;
+    margin: 0;
+    font-size: 12px;
+}
+
+.card-tag {
+    grid-area: tag;
+}
+
+.spin {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding: 100px;
+    margin: right;
+}

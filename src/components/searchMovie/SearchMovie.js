@@ -1,6 +1,6 @@
 import { Input } from 'antd';
 import _debounce from 'lodash.debounce';
-
+import './searchMovie.css';
 
 function SearchMovie({ onSearchQuery }) {
     const onChangeHandler = (e) => {
